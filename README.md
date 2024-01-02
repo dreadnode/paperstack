@@ -1,0 +1,2 @@
+# paperstack
+Arxiv + Notion Sync
