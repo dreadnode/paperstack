@@ -98,6 +98,8 @@ def main():
         print(f" |- Writing {len(to_write)} updates back to Notion")
         write_papers_to_notion(notion_client, args.database_id, to_write)
 
+    print('[+] Done!')
+
 
 if __name__ == "__main__":
     main()
