@@ -89,7 +89,7 @@ def main():
 
     if not all([paper.focus for paper in papers]):
         print(" |- Assigning focus labels with OpenAI")
-        for paper in [p for p in papers if not p.focus]:
+        for paper in [p for p in papers if not p.focus and p.abstract]:
             paper.focus = get_focus_label_from_abstract(openai_client, paper.abstract)
             print(f"    |- {paper.focus}")
 

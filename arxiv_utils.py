@@ -23,21 +23,30 @@ def arxiv_result_to_paper(result: arxiv.Result) -> Paper:
     )
 
 
-def search_arxiv(query: str, max_results=10) -> list[arxiv.Result]:
+def search_arxiv(
+    query: str,
+    max_results=10,
+    sort_by: arxiv.SortCriterion = arxiv.SortCriterion.SubmittedDate,
+) -> list[arxiv.Result]:
     return list(
         client.results(
             arxiv.Search(
                 query,
                 max_results=max_results,
-                sort_by=arxiv.SortCriterion.SubmittedDate,
+                sort_by=sort_by,
             )
         )
     )
 
 
-def search_arxiv_as_paper(query: str, max_results=10) -> list[Paper]:
+def search_arxiv_as_paper(
+    query: str,
+    max_results=10,
+    sort_by: arxiv.SortCriterion = arxiv.SortCriterion.SubmittedDate,
+) -> list[Paper]:
     return [
-        arxiv_result_to_paper(result) for result in search_arxiv(query, max_results)
+        arxiv_result_to_paper(result)
+        for result in search_arxiv(query, max_results, sort_by)
     ]
 
 
@@ -61,11 +70,17 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
             result = search_arxiv_by_id(paper.arxiv_id)
 
         if paper.title and not result:
-            searched = search_arxiv(f'"{paper.title}"', max_results=1)
+            # dashes seem to fuck up the API calls
+            query = f"ti:{paper.title.replace('-', ' ')}"
+            searched = search_arxiv(query, max_results=1, sort_by=arxiv.SortCriterion.Relevance)
             result = searched[0] if searched else None
 
         if not result:
             print(f'[!] Could not find arxiv result for "{paper.title}" [{paper.url}]')
+            continue
+
+        if paper.title != result.title:
+            print(f'[!] Title mismatch: "{paper.title}" vs "{result.title}"')
             continue
 
         paper.title = result.title
