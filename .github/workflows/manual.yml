@@ -17,6 +17,7 @@ on:
 jobs:
   call-core:
     uses: ./.github/workflows/core.yml
+    secrets: inherit
     with:
       search-arxiv: ${{ inputs.search-arxiv }}
       search-scholar: ${{ inputs.search-scholar }}
