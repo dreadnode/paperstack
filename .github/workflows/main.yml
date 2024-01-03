@@ -2,7 +2,8 @@ name: Paperstack
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '*/15 * * * *'  # Run every 15 minutes
+    - cron: '0 6 * * *'     # Run once a day
   workflow_dispatch:
     inputs:
       search-arxiv:
@@ -15,8 +16,36 @@ on:
         default: 'false'
             
 jobs:
-  run-script:
+  run-script-short:
+    name: Paperstack (short)
     runs-on: ubuntu-latest
+    if: github.event.schedule == '*/15 * * * *'
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run script
+      run: python paperstack.py
+      env:
+        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        OPENAI_API_TOKEN: ${{ secrets.OPENAI_API_TOKEN }}
+
+  run-script-long:
+    name: Paperstack (long)
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 6 * * *'
 
     steps:
     - name: Check out code
@@ -34,9 +63,7 @@ jobs:
 
     - name: Run script
       run: |
-        python paperstack.py \
-          ${{ github.event.inputs.search-arxiv == 'true' && '--search-arxiv' || '' }} \
-          ${{ github.event.inputs.search-scholar == 'true' && '--search-semantic-scholar' || '' }}
+        python paperstack.py --search-arxiv --search-semantic-scholar
       env:
         NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}

@@ -7,7 +7,7 @@ client = SemanticScholar()
 
 
 def get_recommended_arxiv_ids_from_semantic_scholar(
-    papers: list[Paper], max_results: int = 5, min_year: int = 2018
+    papers: list[Paper], max_results: int = 10, min_year: int = 2018
 ) -> list[Paper]:
     results: list[dict] = []
     for paper in papers:
@@ -24,6 +24,7 @@ def get_recommended_arxiv_ids_from_semantic_scholar(
                     f"arXiv:{paper_id}", limit=max_results * 2
                 )
             )
+            paper.explored = True
         except Exception as e:
             print(f"[!] {e}]")
             pass

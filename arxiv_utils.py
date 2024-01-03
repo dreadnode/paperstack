@@ -14,12 +14,9 @@ def convert_arxiv_url_to_id(url: str) -> str | None:
 
 def arxiv_result_to_paper(result: arxiv.Result) -> Paper:
     return Paper(
-        page_id=None,
         title=result.title,
         url=result.entry_id,
         arxiv_id=convert_arxiv_url_to_id(result.entry_id),
-        focus=None,
-        summary=None,
         abstract=result.summary,
         authors=[a.name for a in result.authors],
         published=result.published,
@@ -52,7 +49,7 @@ def search_arxiv_by_id(id: str) -> arxiv.Result | None:
 
 def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
     for paper in papers:
-        if paper.published:
+        if paper.has_arxiv_props():
             continue
 
         result: arxiv.Result | None = None

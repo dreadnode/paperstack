@@ -31,18 +31,19 @@ def get_papers_from_notion(client: NotionClient, database_id: str) -> list[Paper
         published = datetime.fromisoformat(published["start"]) if published else None
         focus = properties["Focus"]["select"]
         focus = Focus(focus["name"]) if focus else None
+        explored = properties["Explored"]["checkbox"]
 
         papers.append(
             Paper(
                 page_id=page_id,
                 title=title,
                 url=url,
-                arxiv_id=None,
                 focus=focus,
                 summary=summary,
-                abstract=None,
                 authors=authors,
                 published=published,
+                explored=explored,
+                track_changes=True,
             )
         )
 
@@ -70,6 +71,8 @@ def write_papers_to_notion(
             properties["Published"] = {"date": {"start": paper.published.isoformat()}}
         if paper.focus:
             properties["Focus"] = {"select": {"name": paper.focus.value}}
+        if paper.explored:
+            properties["Explored"] = {"checkbox": paper.explored}
 
         if paper.page_id:
             client.pages.update(paper.page_id, properties=properties)
