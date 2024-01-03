@@ -52,7 +52,7 @@ def main():
     notion_client = get_notion_client(args.notion_token)
     openai_client = get_openai_client(args.openai_token)
 
-    print(" |- Getting papers from Notion")
+    print(f" |- Getting papers from Notion [{args.database_id}]")
     papers = get_papers_from_notion(notion_client, args.database_id)
 
     if not all([p.has_arxiv_props() for p in papers]):
@@ -98,7 +98,7 @@ def main():
         print(f" |- Writing {len(to_write)} updates back to Notion")
         write_papers_to_notion(notion_client, args.database_id, to_write)
 
-    print('[+] Done!')
+    print("[+] Done!")
 
 
 if __name__ == "__main__":
