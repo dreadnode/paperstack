@@ -64,7 +64,7 @@ def main():
         # Search arXiv for new papers and deduplicate
         print(" |- Searching arXiv")
         existing_titles = [paper.title for paper in papers]
-        for searched_paper in search_arxiv_as_paper(args.arxiv_search, max_results=5):
+        for searched_paper in search_arxiv_as_paper(args.arxiv_search_query, max_results=10):
             if searched_paper.title not in existing_titles:
                 print(f"    |- {searched_paper.title[:50]}...")
                 papers.append(searched_paper)
