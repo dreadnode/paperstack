@@ -7,16 +7,10 @@ from _types import Paper
 client = arxiv.Client()
 
 
-def convert_arxiv_url_to_id(url: str) -> str | None:
-    match = re.search(r"\d{4}\.\d{5}", url)
-    return match.group(0) if match else None
-
-
 def arxiv_result_to_paper(result: arxiv.Result) -> Paper:
     return Paper(
         title=result.title,
         url=result.entry_id,
-        arxiv_id=convert_arxiv_url_to_id(result.entry_id),
         abstract=result.summary,
         authors=[a.name for a in result.authors],
         published=result.published,
@@ -63,14 +57,11 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
 
         result: arxiv.Result | None = None
 
-        if paper.url:
-            paper.arxiv_id = convert_arxiv_url_to_id(paper.url)
-
         if paper.arxiv_id:
             result = search_arxiv_by_id(paper.arxiv_id)
 
         if paper.title and not result:
-            # dashes seem to fuck up the API calls
+            # Dashes seem to fuck up the API calls - Finicky in general, links work much better
             query = f"ti:{paper.title.replace('-', ' ')}"
             searched = search_arxiv(query, max_results=1, sort_by=arxiv.SortCriterion.Relevance)
             result = searched[0] if searched else None
@@ -85,7 +76,6 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
 
         paper.title = result.title
         paper.url = result.entry_id
-        paper.arxiv_id = convert_arxiv_url_to_id(result.entry_id)
         paper.abstract = result.summary
         paper.authors = [a.name for a in result.authors]
         paper.published = result.published

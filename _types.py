@@ -1,6 +1,8 @@
-from dataclasses import dataclass, field, asdict
+import re
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
+
 
 class Focus(str, Enum):
     Offensive = "Offensive"
@@ -8,6 +10,7 @@ class Focus(str, Enum):
     Adversarial = "Adversarial"
     Safety = "Safety"
     Other = "Other"
+
 
 @dataclass
 class Paper:
@@ -17,7 +20,6 @@ class Paper:
     page_id: str | None = None
     title: str | None = None
     url: str | None = None
-    arxiv_id: str | None = None
     focus: Focus | None = None
     summary: str | None = None
     abstract: str | None = None
@@ -38,7 +40,7 @@ class Paper:
             return self._original_state != asdict(self)
         else:
             return True
-    
+
     def has_arxiv_props(self) -> bool:
         return all(
             [
@@ -48,3 +50,10 @@ class Paper:
                 self.published,
             ]
         )
+
+    @property
+    def arxiv_id(self) -> str | None:
+        if not self.url:
+            return None
+        match = re.search(r"\d{4}\.\d{5}", self.url)
+        return match.group(0) if match else None
