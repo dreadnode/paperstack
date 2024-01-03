@@ -61,7 +61,7 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
             result = search_arxiv_by_id(paper.arxiv_id)
 
         if paper.title and not result:
-            searched = search_arxiv(paper.title, max_results=1)
+            searched = search_arxiv(f'"{paper.title}"', max_results=1)
             result = searched[0] if searched else None
 
         if not result:
