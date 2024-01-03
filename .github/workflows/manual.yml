@@ -18,5 +18,5 @@ jobs:
   call-core:
     uses: ./.github/workflows/core.yml
     with:
-      search-arxiv: ${{ github.event.inputs.search-arxiv }}
-      search-scholar: ${{ github.event.inputs.search-scholar }}
+      search-arxiv: ${{ inputs.search-arxiv }}
+      search-scholar: ${{ inputs.search-scholar }}
