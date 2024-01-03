@@ -1,0 +1,22 @@
+name: Paperstack (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      search-arxiv:
+        description: 'Search Arxiv?'
+        required: false
+        default: false
+        type: 'boolean'
+      search-scholar:
+        description: 'Search Semantic Scholar?'
+        required: false
+        default: false
+        type: 'boolean'
+
+jobs:
+  call-core:
+    uses: ./.github/workflows/core.yml
+    with:
+      search-arxiv: ${{ github.event.inputs.search-arxiv }}
+      search-scholar: ${{ github.event.inputs.search-scholar }}

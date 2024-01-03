@@ -1,0 +1,12 @@
+name: Paperstack (Short)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Run every 15 minutes
+
+jobs:
+  call-core:
+    uses: ./.github/workflows/core.yml
+    with:
+      search-arxiv: false
+      search-scholar: false

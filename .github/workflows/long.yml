@@ -1,0 +1,12 @@
+name: Paperstack (Long)
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  call-core:
+    uses: ./.github/workflows/core.yml
+    with:
+      search-arxiv: true
+      search-scholar: true
