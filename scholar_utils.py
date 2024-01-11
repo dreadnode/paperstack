@@ -1,7 +1,6 @@
 from semanticscholar import SemanticScholar  # type: ignore
 
 from _types import Paper
-from arxiv_utils import convert_arxiv_url_to_id
 
 client = SemanticScholar()
 
@@ -14,14 +13,13 @@ def get_recommended_arxiv_ids_from_semantic_scholar(
         if not paper.url:
             continue
 
-        paper_id = convert_arxiv_url_to_id(paper.url)
-        if not paper_id:
+        if not paper.arxiv_id:
             continue
 
         try:
             results.extend(
                 client.get_recommended_papers(
-                    f"arXiv:{paper_id}", limit=max_results * 2
+                    f"arXiv:{paper.arxiv_id}", limit=max_results * 2
                 )
             )
             paper.explored = True
@@ -52,15 +50,9 @@ def get_recommended_arxiv_ids_from_semantic_scholar(
     for result in filtered:
         recommended_papers.append(
             Paper(
-                page_id=None,
                 title=result["title"],
-                url=None,
-                arxiv_id=result["externalIds"]["ArXiv"],
-                summary=None,
-                focus=None,
+                url=f'https://arxiv.org/abs/{result["externalIds"]["ArXiv"]}',
                 abstract=result["abstract"],
-                authors=[],
-                published=None,
             )
         )
 

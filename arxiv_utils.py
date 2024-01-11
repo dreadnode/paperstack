@@ -1,5 +1,3 @@
-import re
-
 import arxiv  # type: ignore
 
 from _types import Paper
@@ -60,7 +58,7 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
         if paper.arxiv_id:
             result = search_arxiv_by_id(paper.arxiv_id)
 
-        if paper.title and not result:
+        if not result and paper.title:
             # Dashes seem to fuck up the API calls - Finicky in general, links work much better
             query = f"ti:{paper.title.replace('-', ' ')}"
             searched = search_arxiv(query, max_results=1, sort_by=arxiv.SortCriterion.Relevance)
@@ -70,7 +68,7 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
             print(f'[!] Could not find arxiv result for "{paper.title}" [{paper.url}]')
             continue
 
-        if paper.title != result.title:
+        if paper.title and paper.title != result.title:
             print(f'[!] Title mismatch: "{paper.title}" vs "{result.title}"')
             continue
 

@@ -35,7 +35,7 @@ def get_papers_from_notion(client: NotionClient, database_id: str) -> list[Paper
 
         if not any([url, title]):
             continue
-        
+
         papers.append(
             Paper(
                 page_id=page_id,
