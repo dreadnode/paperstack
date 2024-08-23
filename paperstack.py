@@ -1,5 +1,7 @@
 import argparse
+import asyncio
 import os
+from datetime import datetime
 
 from arxiv_utils import fill_papers_with_arxiv, search_arxiv_as_paper
 from notion_utils import (
@@ -20,7 +22,7 @@ ARXIV_SEARCH = """\
 """
 
 
-def main():
+async def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -53,7 +55,12 @@ def main():
     openai_client = get_openai_client(args.openai_token)
 
     print(f" |- Getting papers from Notion [{args.database_id}]")
-    papers = get_papers_from_notion(notion_client, args.database_id)
+    papers = await get_papers_from_notion(notion_client, args.database_id)
+    print(f"    |- {len(papers)} existing papers")
+
+    for p in papers:
+        if p.published < datetime.fromisoformat("2024-07-01 00:00:00+00:00"):
+            p.explored = True
 
     if not all([p.has_arxiv_props() for p in papers]):
         print(" |- Filling in missing data from arXiv")
@@ -63,7 +70,7 @@ def main():
         print(" |- Searching arXiv for new papers")
         existing_titles = [paper.title for paper in papers]
         for searched_paper in search_arxiv_as_paper(
-            args.arxiv_search_query, max_results=10
+            args.arxiv_search_query, max_results=50
         ):
             if searched_paper.title not in existing_titles:
                 print(f"    |- {searched_paper.title[:50]}...")
@@ -73,7 +80,7 @@ def main():
         to_explore = [p for p in papers if not p.explored]
         if to_explore:
             print(" |- Getting related papers from Semantic Scholar")
-            recommended_papers = get_recommended_arxiv_ids_from_semantic_scholar(papers)
+            recommended_papers = get_recommended_arxiv_ids_from_semantic_scholar(to_explore)
             papers.extend(fill_papers_with_arxiv(recommended_papers))
             print(f"    |- {len(recommended_papers)} new papers")
         else:
@@ -96,10 +103,10 @@ def main():
     to_write = [p for p in papers if p.has_changed()]
     if to_write:
         print(f" |- Writing {len(to_write)} updates back to Notion")
-        write_papers_to_notion(notion_client, args.database_id, to_write)
+        await write_papers_to_notion(notion_client, args.database_id, to_write)
 
     print("[+] Done!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

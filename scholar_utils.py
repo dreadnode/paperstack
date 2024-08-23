@@ -1,4 +1,5 @@
 from semanticscholar import SemanticScholar  # type: ignore
+from tqdm import tqdm  # type: ignore
 
 from _types import Paper
 
@@ -9,7 +10,7 @@ def get_recommended_arxiv_ids_from_semantic_scholar(
     papers: list[Paper], max_results: int = 10, min_year: int = 2018
 ) -> list[Paper]:
     results: list[dict] = []
-    for paper in papers:
+    for paper in tqdm(papers):
         if not paper.url:
             continue
 

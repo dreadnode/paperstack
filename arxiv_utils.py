@@ -70,7 +70,6 @@ def fill_papers_with_arxiv(papers: list[Paper]) -> list[Paper]:
 
         if paper.title and paper.title != result.title:
             print(f'[!] Title mismatch: "{paper.title}" vs "{result.title}"')
-            continue
 
         paper.title = result.title
         paper.url = result.entry_id

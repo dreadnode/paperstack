@@ -1,20 +1,24 @@
+import asyncio
 import typing as t
 from datetime import datetime
 
-from notion_client import Client
-from notion_client.helpers import collect_paginated_api
+from notion_client import AsyncClient
+from notion_client.helpers import async_collect_paginated_api
+from tqdm import tqdm  # type: ignore
 
 from _types import Paper, Focus
 
-NotionClient = Client
+NotionClient = AsyncClient
 
 
 def get_notion_client(token: str) -> NotionClient:
     return NotionClient(auth=token)
 
 
-def get_papers_from_notion(client: NotionClient, database_id: str) -> list[Paper]:
-    results = collect_paginated_api(client.databases.query, database_id=database_id)
+async def get_papers_from_notion(client: NotionClient, database_id: str) -> list[Paper]:
+    results = await async_collect_paginated_api(
+        client.databases.query, database_id=database_id
+    )
 
     papers: list[Paper] = []
     for result in results:
@@ -53,10 +57,10 @@ def get_papers_from_notion(client: NotionClient, database_id: str) -> list[Paper
     return papers
 
 
-def write_papers_to_notion(
+async def write_papers_to_notion(
     client: NotionClient, database_id: str, papers: list[Paper]
 ) -> None:
-    for paper in papers:
+    for paper in tqdm(papers):
         properties: dict[str, t.Any] = {}
         if paper.title:
             properties["Title"] = {"title": [{"text": {"content": paper.title}}]}
@@ -78,8 +82,10 @@ def write_papers_to_notion(
             properties["Explored"] = {"checkbox": paper.explored}
 
         if paper.page_id:
-            client.pages.update(paper.page_id, properties=properties)
+            await client.pages.update(paper.page_id, properties=properties)
         else:
-            client.pages.create(
+            await client.pages.create(
                 parent={"database_id": database_id}, properties=properties
             )
+
+    return None
