@@ -10,6 +10,7 @@ from notion_utils import (
     write_papers_to_notion,
 )
 from openai_utils import (
+    get_attack_type_from_abstract,
     get_focus_label_from_abstract,
     get_openai_client,
     summarize_abstract_with_openai,
@@ -48,7 +49,6 @@ async def main():
     parser.add_argument("--search-semantic-scholar", action="store_true", default=False)
 
     args = parser.parse_args()
-
     print("[+] Paperstack")
 
     notion_client = get_notion_client(args.notion_token)
@@ -62,6 +62,9 @@ async def main():
         if p.published < datetime.fromisoformat("2024-07-01 00:00:00+00:00"):
             p.explored = True
 
+        if len(p.authors) > 5:
+            p.authors = p.authors[:5]
+
     if not all([p.has_arxiv_props() for p in papers]):
         print(" |- Filling in missing data from arXiv")
         papers = fill_papers_with_arxiv(papers)
@@ -70,7 +73,7 @@ async def main():
         print(" |- Searching arXiv for new papers")
         existing_titles = [paper.title for paper in papers]
         for searched_paper in search_arxiv_as_paper(
-            args.arxiv_search_query, max_results=50
+            args.arxiv_search_query, max_results=500
         ):
             if searched_paper.title not in existing_titles:
                 print(f"    |- {searched_paper.title[:50]}...")
@@ -96,10 +99,18 @@ async def main():
 
     if not all([paper.focus for paper in papers]):
         print(" |- Assigning focus labels with OpenAI")
-        for paper in [p for p in papers if not p.focus and p.abstract]:
-            paper.focus = get_focus_label_from_abstract(openai_client, paper.abstract)
+        for paper in [p for p in papers if not p.focus and (p.abstract or p.summary)]:
+            reference = paper.abstract or paper.summary
+            paper.focus = get_focus_label_from_abstract(openai_client, reference)
             print(f"    |- {paper.focus}")
 
+    if not all([paper.attack_type for paper in papers]):
+        print(" |- Assigning attack types with OpenAI")
+        for paper in [p for p in papers if not p.attack_type and (p.abstract or p.summary)]:
+            reference = paper.abstract or paper.summary
+            paper.attack_type = get_attack_type_from_abstract(openai_client, reference)
+            print(f"    |- {paper.attack_type}")
+            
     to_write = [p for p in papers if p.has_changed()]
     if to_write:
         print(f" |- Writing {len(to_write)} updates back to Notion")

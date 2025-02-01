@@ -11,6 +11,14 @@ class Focus(str, Enum):
     Safety = "Safety"
     Other = "Other"
 
+class AttackType(str, Enum):
+    ModelEvasion = "Evasion"
+    ModelExtraction = "Extraction"
+    ModelInversion = "Inversion"
+    ModelPoisoning = "Poisoning"
+    PromptInjection = "Prompt Injection"
+    Other = "Other"
+
 
 @dataclass
 class Paper:
@@ -21,6 +29,7 @@ class Paper:
     title: str | None = None
     url: str | None = None
     focus: Focus | None = None
+    attack_type: AttackType | None = None
     summary: str | None = None
     abstract: str | None = None
     authors: list[str] = field(default_factory=list)
