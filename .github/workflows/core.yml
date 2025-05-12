@@ -11,9 +11,6 @@ on:
         description: "Search Semantic Scholar?"
         required: true
         type: "boolean"
-  push:
-    branches:
-      - "ads/eng-1935-paperstack-1-notion-api-timeouts-causing-paperstack"
 
 jobs:
   run-script:
